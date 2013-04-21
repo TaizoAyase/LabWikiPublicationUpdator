@@ -45,7 +45,7 @@ class Publication
 	def <<(other)
 		flag = nil
 		@ary << other
-		flag = year_check
+		#flag = year_check
 		flag = true
 		if flag
 			return self
