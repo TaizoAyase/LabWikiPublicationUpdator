@@ -58,13 +58,22 @@ class Article
 		out
 	end
 
+	def ==(other)
+		@pubmedid == other.pubmedid
+	end
+
 	protected
 
 	def set_table(hash)
 		@table = hash
 	end
 
+	def pubmedid
+		@pubmedid
+	end
+
 	private
+
 	#既存のLabo Wikiの各エントリの各行から
 	#keyとvalueを配列で返す
 	def set_key_val(str)
