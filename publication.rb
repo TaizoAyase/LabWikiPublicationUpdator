@@ -6,25 +6,24 @@ require "bio"
 class Publication
 	attr_accessor :ary
 	
-	def self.parser(file_path)
-		File.open(file_path, "r") do |f|
-			flag = false
-			list = Publication.new
-			while line = f.gets
-				line.chomp!
-				case line
-				when "#pubref(){{"
-					art = Article.new
-					flag = true
-				when "}}"
-					flag = false
-					list.ary << art
-				else
-					art.parser(line) if flag
-				end
+	def self.parser(str)
+    ary = str.split("\n")
+		flag = false
+		list = Publication.new
+		while line = ary.shift
+			line.chomp!
+			case line
+			when "#pubref(){{"
+				art = Article.new
+				flag = true
+			when "}}"
+				flag = false
+				list.ary << art
+			else
+				art.parser(line) if flag
 			end
-			return list
 		end
+		return list
 	end
 
 	#記事情報はAry中の要素の1つ1つとして

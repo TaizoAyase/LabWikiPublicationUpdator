@@ -5,15 +5,12 @@ require "bio"
 require "yaml"
 
 class Article
+
+  attr_reader :pubmedid
+  
 	def initialize
-		@title = nil
-		@author = nil
-		@journal = nil
-		@vil = nil
-		@page = nil
 		@year = nil
 		@pubmedid = nil
-		@pdbid = nil
 
 		@table = {
 			:t => nil,
@@ -27,17 +24,13 @@ class Article
 		}
 	end
 
-	#ある文字列を与えたときに、
-	#それがArticleのどの要素になるか判断して
+	#ある文字列を与えたときに、それがArticleのどの要素になるか判断して
 	#要素を追加するメソッド
-	#既存の記事情報からこのRuby内で扱う
-	#ハッシュ形式に変換する
 	def parser(str)
 		str_splitted = str.split("\n")
-		str_splitted.each do |str|
-			flag = str =~ /^(.):(.*)$/
-			next unless flag
-			key, val = set_key_val(str)
+		str_splitted.each do |elem|
+			next unless elem =~ /^(.):(.*)$/
+			key, val = get_key_val(elem)
 			@table[key] = val
 		end
 		self
@@ -62,21 +55,10 @@ class Article
 		@pubmedid == other.pubmedid
 	end
 
-	protected
-
-	def set_table(hash)
-		@table = hash
-	end
-
-	def pubmedid
-		@pubmedid
-	end
-
 	private
 
-	#既存のLabo Wikiの各エントリの各行から
-	#keyとvalueを配列で返す
-	def set_key_val(str)
+	#既存のLabo Wikiの各エントリの各行からkeyとvalueを配列で返す
+	def get_key_val(str)
 		str.chomp!
 		str =~ /^(.):(.*)$/
 		key = $1.to_sym
@@ -97,30 +79,31 @@ end
 class PubMedArticle < Article
 	include Comparable
 
-	str = File.read("conf.yaml")
-	@@config = YAML.load(str)
+	@@config = YAML.load(File.read("conf.yaml"))
 
-	attr_reader :date
+  #NCBI用のEmailをセットしておく
+	Bio::NCBI.default_email = @@config["email"]
+
 	attr_reader :year
+
+  def self.parse(str)
+    PubMedArticle.new.parser(str)
+  end
 
 	#任意の検索ワードで検索し、PubMedIDを返すクラスメソッド
 	#optionハッシュはBio::PubMedのesearchに従う
 	def self.search(keyword = "", option = {})
-		set_email
 		Bio::PubMed.esearch(keyword, option)
 	end
 
 	#PubMedIDを与えるコンストラクタ
-	#ハッシュを生成し、privateメソッドを呼び出す
-	#比較用の@dateを定義する
+	#ハッシュを生成し、MEDLINEオブジェクトからハッシュをセット
 	def initialize(pubmed_id = nil)
 		super()
 		if pubmed_id
 			@pubmedid = pubmed_id.to_i
 			pubmed_to_medline
 			medline_to_table
-			#pattern = "%Y %b %d"
-			#@date = Date.strptime(@medline.date, pattern)
 			@year = @medline.year
 		end
 		return self
@@ -138,8 +121,6 @@ class PubMedArticle < Article
 	#PubMedIDからMEDLINEオブジェクトの情報を取り出す
 	def pubmed_to_medline
 		raise unless @pubmedid
-		puts @pubmedid
-		set_email
 		manuscript = Bio::PubMed.efetch(@pubmedid.to_s)
 		@medline = Bio::MEDLINE.new(manuscript.first)
 	end
@@ -161,9 +142,4 @@ class PubMedArticle < Article
 		}
 	end
 
-	def set_email
-		#AyaseのGmailのアカウントで認証しておく
-		#特に誰の認証で使うかはここでは関係ないだろう
-		Bio::NCBI.default_email = @@config["email"]
-	end
 end

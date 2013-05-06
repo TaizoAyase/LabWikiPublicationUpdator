@@ -5,9 +5,8 @@ require "./publication"
 require "./article"
 require "yaml"
 
-config = YAML.load("conf.yaml")
+config = YAML.load(File.read("conf.yaml"))
 
-#f = "./labwiki_before.txt"
 out = Publication.new
 pub = PubMedArticle.search(config["keyword"])
 pub.each do |id|
