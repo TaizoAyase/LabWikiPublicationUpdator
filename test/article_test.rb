@@ -24,12 +24,12 @@ class PubMedArticleTest < Test::Unit::TestCase
 		assert_equal article.output.gsub("\n", ""), str.gsub("\n", "")
 	end
 
-  def test_initialize_non_argument_connot_get_year
+  def test_initialize_no_argument_connot_get_year
     article = PubMedArticle.new
     assert_nil article.year
   end
 
-  def test_initialize_non_argument_connot_get_pubmedid
+  def test_initialize_no_argument_connot_get_pubmedid
     article = PubMedArticle.new
     assert_nil article.pubmedid
   end
