@@ -15,27 +15,27 @@ puts ol_tag.size
 
 ary = []
 lists.each do |ol|
-	#inner = Nokogiri::HTML.parse(ol.inner_html)
-	inner = ol
-	inner.search("span[@class = pub_year]").text =~ /\d\d\d\d/
-	year = Regexp.last_match.to_s.to_i
-	year_range = 2011..2015
+  #inner = Nokogiri::HTML.parse(ol.inner_html)
+  inner = ol
+  inner.search("span[@class = pub_year]").text =~ /\d\d\d\d/
+  year = Regexp.last_match.to_s.to_i
+  year_range = 2011..2015
   break unless year_range.include? year #2011-2015年以前のものは処理しない
-	ary << year
+  ary << year
 
-	url = inner.search("div[@class = pub_dblink]/a/@href").to_s
-	/list_uids=(\d+)/ =~ url
-	p_id = $1
-	puts p_id 
+  url = inner.search("div[@class = pub_dblink]/a/@href").to_s
+  /list_uids=(\d+)/ =~ url
+  p_id = $1
+  puts p_id 
 end
 ap ary
 
 # 既存のArticleと新規のものとの比較だけなら、
 # タイトル他の情報はパースしないで==で比較する
 class WebArticle < Article
-	def self.parse(url)
-		ol_tag.size
-	end
+  def self.parse(url)
+    ol_tag.size
+  end
 
   def self.set_year_range(start, last)
     old, new = [start, last].sort
@@ -43,21 +43,21 @@ class WebArticle < Article
     return @@year_range
   end
 
-	def initialize(url)
+  def initialize(url)
     raise unless @@year_range
-		html = open(url).read.encode('utf-8')
-		tds = Nokogiri::HTML.parse(html, url)
-		
-		lists = tds.xpath('//ol/li')
+    html = open(url).read.encode('utf-8')
+    tds = Nokogiri::HTML.parse(html, url)
+    
+    lists = tds.xpath('//ol/li')
     lists.each do |li_tag|
       
     end
-	end
+  end
 
-	def ==(other)
-		@pubmedid.to_i == other.pubmedid.to_i
-	end
+  def ==(other)
+    @pubmedid.to_i == other.pubmedid.to_i
+  end
 
-	private
+  private
 
 end
